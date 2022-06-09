@@ -1,0 +1,71 @@
+service: cloudverse-workstation-service
+
+frameworkVersion: "3"
+
+provider:
+    name: aws
+    runtime: nodejs14.x
+    stage: prod
+    region: ca-central-1
+    versionFunctions: false
+    memorySize: 256
+    timeout: 10
+    iam:
+        role: arn:aws:iam::855092731476:role/cloudverse-lambda-workstation-service
+    environment:
+        BASE_IMAGE_ID_WINDOWS_DEFAULT: ami-011d054d4dae54d05
+        DEFAULT_SECURITY_GROUP: sg-0b20241e0e4379b63
+        DEFAULT_INSTANCE_TYPE: t2.medium
+        DEFAULT_VOLUME_SIZE: 30
+        WINDOWS_USER_DATA_BASE64: PHBvd2Vyc2hlbGw+CkltcG9ydC1Nb2R1bGUgYzpcUHJvZ3JhbURhdGFcQW1hem9uXEVDMi1XaW5kb3dzXExhdW5jaFxNb2R1bGVcRWMyTGF1bmNoLnBzbTEgOyBBZGQtUm91dGVzCjwvcG93ZXJzaGVsbD4KPHBlcnNpc3Q+dHJ1ZTwvcGVyc2lzdD4=
+        HOSTED_ZONE_ID: Z06814722LBUV85MJIZXR
+        BASE_URL: cloudverse.app
+
+functions:
+    event-ec2-shutdown:
+        handler: services/Shutdown.service
+        events:
+            - cloudwatchEvent:
+                  name: "cloudverse-ec2-shutdown"
+                  event:
+                      source:
+                          - "aws.ec2"
+                      detail-type:
+                          - "EC2 Instance State-change Notification"
+                      detail:
+                          state:
+                              - stopped
+    event-ec2-snapped:
+        handler: services/Snapped.service
+        events:
+            - cloudwatchEvent:
+                  name: "cloudverse-ec2-snapped"
+                  event:
+                      source:
+                          - "aws.ec2"
+                      detail-type:
+                          - "EBS Snapshot Notification"
+                      detail:
+                          event:
+                              - "createSnapshot"
+                          result:
+                              - "succeeded"
+    trigger-ec2-provision:
+        handler: services/Provision.service
+        events:
+            - sqs:
+                  arn: arn:aws:sqs:ca-central-1:855092731476:cloudverse-provision
+                  batchSize: 1
+    event-ec2-startup:
+        handler: services/Startup.service
+        events:
+            - cloudwatchEvent:
+                  name: "cloudverse-ec2-startup"
+                  event:
+                      source:
+                          - "aws.ec2"
+                      detail-type:
+                          - "EC2 Instance State-change Notification"
+                      detail:
+                          state:
+                              - running

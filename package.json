@@ -1,0 +1,23 @@
+{
+  "name": "cloudverse-workstation-service",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.1077.0",
+    "short-uuid": "^4.2.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git.cs.dal.ca/shah2/cloudverse-workstation-service.git"
+  },
+  "author": "",
+  "license": "ISC"
+}
